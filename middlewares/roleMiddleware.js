@@ -14,7 +14,7 @@ const requireAdmin = (req, res, next) => {
 const requireProjectRole = (roles) => {
   return async (req, res, next) => {
     try {
-      let projectId = req.params.id || req.body.id_proyecto;
+      let projectId = req.params.id || req.params.projectId || req.body.id_proyecto;
       
       console.log('🔍 Middleware requireProjectRole ejecutándose');
       console.log('📋 Parámetros recibidos:', {
