@@ -14,17 +14,18 @@ const requireAdmin = (req, res, next) => {
 const requireProjectRole = (roles) => {
   return async (req, res, next) => {
     try {
-      let projectId = req.params.id || req.params.projectId || req.body.id_proyecto;
+      let projectId = req.params.projectId || req.body.id_proyecto;
       
-      console.log('🔍 Middleware requireProjectRole ejecutándose');
-      console.log('📋 Parámetros recibidos:', {
-        params: req.params,
-        body: req.body,
-        baseUrl: req.baseUrl,
-        originalUrl: req.originalUrl
+      console.log('🔍 ===== MIDDLEWARE requireProjectRole INICIO =====');
+      console.log('📋 Ruta completa:', req.method, req.originalUrl);
+      console.log('👤 Usuario:', {
+        id: req.user.id_usuario,
+        rol_global: req.user.rol_global,
+        email: req.user.email
       });
+      console.log('📍 ProjectId inicial:', projectId);
 
-      // Si estamos en una ruta de tarea individual (/tasks/:id), obtener el projectId de la tarea
+      // Si estamos en una ruta de tarea individual (/tasks/:id) y no tenemos projectId, obtenerlo de la tarea
       if (!projectId && req.params.id && req.baseUrl.includes('/tasks')) {
         console.log('🔄 Buscando projectId desde la tarea con ID:', req.params.id);
         const task = await TaskModel.findById(req.params.id);
@@ -38,7 +39,13 @@ const requireProjectRole = (roles) => {
         }
         
         projectId = task.id_proyecto;
-        console.log('✅ ProjectId encontrado:', projectId);
+        console.log('✅ Tarea encontrada:', {
+          id_tarea: task.id_tarea,
+          titulo: task.titulo,
+          id_proyecto: task.id_proyecto,
+          id_creador: task.id_creador,
+          id_asignado: task.id_asignado
+        });
         // Guardar la tarea en el request para reutilizarla
         req.task = task;
       }
@@ -51,6 +58,8 @@ const requireProjectRole = (roles) => {
         });
       }
 
+      console.log('🎯 ProjectId final para verificación:', projectId);
+
       console.log('👤 Verificando permisos para usuario:', req.user.id_usuario, 'en proyecto:', projectId);
 
       const [projectRoles] = await pool.execute(
@@ -60,10 +69,13 @@ const requireProjectRole = (roles) => {
         [req.user.id_usuario, projectId]
       );
 
-      console.log('📊 Roles encontrados:', projectRoles);
+      console.log('📊 Resultado de la consulta:', {
+        filasEncontradas: projectRoles.length,
+        datos: projectRoles
+      });
 
       if (projectRoles.length === 0) {
-        console.log('❌ Usuario no es miembro del proyecto');
+        console.log('❌ USUARIO NO ES MIEMBRO DEL PROYECTO - Bloqueando acceso');
         return res.status(403).json({ 
           success: false, 
           message: 'No tienes acceso a este proyecto' 

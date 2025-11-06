@@ -90,7 +90,6 @@ class TaskController {
       const projectId = req.params.id;
       const tasks = await TaskModel.findByProjectId(projectId);
 
-      // Incluir el rol_proyecto en cada tarea
       const tasksWithRole = tasks.map((task) => ({
         ...task,
         rol_proyecto: req.user.projectRole,
