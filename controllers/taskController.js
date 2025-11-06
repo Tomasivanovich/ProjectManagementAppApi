@@ -232,6 +232,43 @@ class TaskController {
     });
   }
 
+  static async getTaskById(req, res) {
+    try {
+      const taskId = req.params.id;
+      const task = await TaskModel.findById(taskId);
+
+      if (!task) {
+        return res.status(404).json({
+          success: false,
+          message: "Tarea no encontrada",
+        });
+      }
+
+      // Verificar que el usuario tiene acceso al proyecto de esta tarea
+      const project = await ProjectModel.findById(task.id_proyecto);
+      if (!project) {
+        return res.status(404).json({
+          success: false,
+          message: "Proyecto no encontrado",
+        });
+      }
+
+      // Aquí podrías agregar lógica adicional para verificar permisos
+      // si es necesario
+
+      res.json({
+        success: true,
+        data: task,
+      });
+    } catch (error) {
+      console.error("Error obteniendo tarea:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error interno del servidor",
+      });
+    }
+  }
+
   static async deleteTask(req, res) {
     try {
       const taskId = req.params.id;

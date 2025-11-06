@@ -137,16 +137,4 @@ router.post("/refresh", AuthController.refreshToken);
  */
 router.post("/google", AuthController.googleLogin);
 
-/**
- * @swagger
- * /api/auth/facebook:
- *   get:
- *     summary: Login con Facebook (Mock)
- *     tags: [Autenticación]
- *     responses:
- *       200:
- *         description: Endpoint mock para login social
- */
-
-
 module.exports = router;

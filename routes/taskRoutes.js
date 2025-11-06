@@ -299,4 +299,42 @@ router.delete(
   TaskController.deleteTask
 );
 
+/**
+ * @swagger
+ * /api/tasks/{id}:
+ *   get:
+ *     summary: Obtener una tarea específica por ID
+ *     tags: [Tareas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la tarea
+ *     responses:
+ *       200:
+ *         description: Tarea obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Task'
+ *       404:
+ *         description: Tarea no encontrada
+ *       403:
+ *         description: No tiene acceso a esta tarea
+ */
+router.get(
+  "/:id",
+  requireProjectRole(["creador", "lider", "colaborador"]),
+  TaskController.getTaskById
+);
+
 module.exports = router;
