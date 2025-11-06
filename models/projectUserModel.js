@@ -96,7 +96,7 @@ class ProjectUserModel {
       await connection.beginTransaction();
 
       console.log(
-        `🔄 Actualizando rol: usuario ${userId}, proyecto ${projectId}, nuevo rol: ${newRole}`
+        `Actualizando rol: usuario ${userId}, proyecto ${projectId}, nuevo rol: ${newRole}`
       );
 
       // Primero verificar que el usuario existe en el proyecto
@@ -106,15 +106,15 @@ class ProjectUserModel {
         [userId, projectId]
       );
 
-      console.log(`📊 Usuario encontrado en proyecto:`, existing.length > 0);
+      console.log(`Usuario encontrado en proyecto:`, existing.length > 0);
 
       if (existing.length === 0) {
         await connection.rollback();
-        console.log("❌ Usuario no encontrado en el proyecto");
+        console.log("Usuario no encontrado en el proyecto");
         return false;
       }
 
-      console.log(`📝 Rol actual: ${existing[0].rol_proyecto}`);
+      console.log(`Rol actual: ${existing[0].rol_proyecto}`);
 
       // Actualizar el rol
       const [result] = await connection.execute(
@@ -124,14 +124,14 @@ class ProjectUserModel {
         [newRole, userId, projectId]
       );
 
-      console.log(`✅ Filas afectadas:`, result.affectedRows);
-      console.log(`✅ Cambio: ${existing[0].rol_proyecto} → ${newRole}`);
+      console.log(`Filas afectadas:`, result.affectedRows);
+      console.log(`Cambio: ${existing[0].rol_proyecto} → ${newRole}`);
 
       await connection.commit();
       return result.affectedRows > 0;
     } catch (error) {
       await connection.rollback();
-      console.error("💥 Error en updateUserRole:", error);
+      console.error("Error en updateUserRole:", error);
       throw error;
     } finally {
       connection.release();
@@ -253,55 +253,6 @@ class ProjectUserModel {
     return projects;
   }
 
-  /**
-   * Transferir propiedad del proyecto
-   */
-  static async transferProjectOwnership(projectId, currentOwnerId, newOwnerId) {
-    const connection = await pool.getConnection();
-
-    try {
-      await connection.beginTransaction();
-
-      // Verificar que el nuevo usuario pertenece al proyecto
-      const [userInProject] = await connection.execute(
-        "SELECT rol_proyecto FROM usuarios_proyectos WHERE id_usuario = ? AND id_proyecto = ?",
-        [newOwnerId, projectId]
-      );
-
-      if (userInProject.length === 0) {
-        throw new Error("El nuevo propietario debe pertenecer al proyecto");
-      }
-
-      // Actualizar creador del proyecto
-      await connection.execute(
-        "UPDATE proyectos SET id_creador = ? WHERE id_proyecto = ? AND id_creador = ?",
-        [newOwnerId, projectId, currentOwnerId]
-      );
-
-      // Actualizar rol del nuevo propietario
-      await connection.execute(
-        'UPDATE usuarios_proyectos SET rol_proyecto = "creador" WHERE id_usuario = ? AND id_proyecto = ?',
-        [newOwnerId, projectId]
-      );
-
-      // Actualizar rol del antiguo propietario
-      await connection.execute(
-        'UPDATE usuarios_proyectos SET rol_proyecto = "lider" WHERE id_usuario = ? AND id_proyecto = ?',
-        [currentOwnerId, projectId]
-      );
-
-      await connection.commit();
-      return {
-        success: true,
-        message: "Propiedad del proyecto transferida exitosamente",
-      };
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
-  }
 }
 
 module.exports = ProjectUserModel;

@@ -4,7 +4,7 @@ const { validationResult } = require("express-validator");
 const UserModel = require("../models/userModel");
 const jwtConfig = require("../config/jwt");
 const { OAuth2Client } = require("google-auth-library");
-const axios = require('axios'); 
+const axios = require("axios");
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const client = new OAuth2Client(CLIENT_ID);
@@ -155,12 +155,10 @@ class AuthController {
       const { email, name: nombre, picture } = userInfoResponse.data;
 
       if (!email) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "No se pudo obtener el email de Google",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "No se pudo obtener el email de Google",
+        });
       }
 
       let user = await UserModel.findByEmail(email);
@@ -193,90 +191,20 @@ class AuthController {
 
       // Error más específico
       if (error.response?.status === 401) {
-        return res
-          .status(401)
-          .json({
-            success: false,
-            message: "Token de Google inválido o expirado",
-          });
+        return res.status(401).json({
+          success: false,
+          message: "Token de Google inválido o expirado",
+        });
       }
 
       if (error.response?.data) {
         console.error("Error de Google API:", error.response.data);
       }
 
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Error en login Google: " + error.message,
-        });
-    }
-  }
-
-  // Login con Discord
-  static async discordLogin(req, res) {
-    try {
-      const { access_token } = req.body;
-
-      if (!access_token) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Access token es requerido" });
-      }
-
-      // Obtener información del usuario de Discord
-      const userInfoResponse = await axios.get(
-        "https://discord.com/api/users/@me",
-        {
-          headers: { Authorization: `Bearer ${access_token}` },
-        }
-      );
-
-      const { id, username, email, avatar } = userInfoResponse.data;
-
-      if (!email) {
-        return res.status(400).json({
-          success: false,
-          message: "No se pudo obtener el email de Discord",
-        });
-      }
-
-      let user = await UserModel.findByEmail(email);
-
-      if (!user) {
-        const nombre = username;
-        const discordAvatar = avatar
-          ? `https://cdn.discordapp.com/avatars/${id}/${avatar}.png`
-          : null;
-
-        const userId = await UserModel.create({
-          nombre,
-          email,
-          password: null,
-          avatar: discordAvatar,
-        });
-        user = await UserModel.findById(userId);
-      }
-
-      const token = jwt.sign(
-        { id: user.id_usuario, email: user.email },
-        jwtConfig.secret,
-        {
-          expiresIn: jwtConfig.expiresIn,
-        }
-      );
-
-      res.json({
-        success: true,
-        message: "Login con Discord exitoso",
-        data: { token, user },
+      res.status(500).json({
+        success: false,
+        message: "Error en login Google: " + error.message,
       });
-    } catch (error) {
-      console.error("Error login Discord:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Error en login Discord" });
     }
   }
 }

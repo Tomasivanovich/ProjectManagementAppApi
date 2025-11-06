@@ -222,56 +222,6 @@ router.patch(
 
 /**
  * @swagger
- * /api/tasks/{id}/upload:
- *   post:
- *     summary: Subir archivo adjunto a una tarea (Todos los miembros)
- *     tags: [Tareas]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID de la tarea
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               archivo:
- *                 type: string
- *                 format: binary
- *     responses:
- *       200:
- *         description: Archivo subido exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/Task'
- *       400:
- *         description: No se subió ningún archivo o archivo inválido
- *       404:
- *         description: Tarea no encontrada
- */
-router.post(
-  "/:id/upload",
-  requireProjectRole(["creador", "lider", "colaborador"]),
-  TaskController.uploadFile
-);
-
-/**
- * @swagger
  * /api/tasks/{id}:
  *   delete:
  *     summary: Eliminar una tarea (Solo Creador)

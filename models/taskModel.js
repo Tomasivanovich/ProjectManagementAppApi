@@ -50,15 +50,6 @@ class TaskModel {
     return result.affectedRows > 0;
   }
 
-  static async updateFile(id, archivo) {
-    const [result] = await pool.execute(
-      "UPDATE tareas SET archivo = ? WHERE id_tarea = ?",
-      [archivo, id]
-    );
-
-    return result.affectedRows > 0;
-  }
-
   static async delete(id) {
     const [result] = await pool.execute(
       "DELETE FROM tareas WHERE id_tarea = ?",

@@ -71,7 +71,7 @@ class ProjectController {
         });
       }
 
-      // Verificar que el usuario tiene acceso al proyecto usando el nuevo modelo
+      // Verificar que el usuario tiene acceso al proyecto
       const hasAccess =
         (await ProjectUserModel.hasProjectAccess(
           req.user.id_usuario,
@@ -85,10 +85,8 @@ class ProjectController {
         });
       }
 
-      // Obtener usuarios del proyecto usando el nuevo modelo
       const projectUsers = await ProjectUserModel.getProjectUsers(projectId);
 
-      // Obtener estadísticas del proyecto
       const projectStats = await ProjectUserModel.getProjectStats(projectId);
 
       res.json({
@@ -210,7 +208,7 @@ class ProjectController {
         });
       }
 
-      // Agregar usuario al proyecto usando el nuevo modelo
+      // Agregar usuario al proyecto 
       const result = await ProjectUserModel.addUserToProject(
         user.id_usuario,
         projectId,
@@ -412,7 +410,7 @@ class ProjectController {
       console.log("Project ID:", projectId);
       console.log("User ID:", userId);
 
-      // 1. Verificar si el proyecto existe
+      // Verificar si el proyecto existe
       const project = await ProjectModel.findById(projectId);
       console.log("Proyecto encontrado:", project ? "SÍ" : "NO");
       if (project) {
@@ -424,14 +422,14 @@ class ProjectController {
         );
       }
 
-      // 2. Verificar si el usuario existe
+      // Verificar si el usuario existe
       const user = await UserModel.findById(userId);
       console.log("Usuario encontrado:", user ? "SÍ" : "NO");
       if (user) {
         console.log("Usuario:", user.nombre, user.email);
       }
 
-      // 3. Verificar relación en usuarios_proyectos
+      // Verificar relación en usuarios_proyectos
       const [directRelation] = await pool.execute(
         "SELECT * FROM usuarios_proyectos WHERE id_proyecto = ? AND id_usuario = ?",
         [projectId, userId]
@@ -441,14 +439,14 @@ class ProjectController {
         console.log("Relación:", directRelation[0]);
       }
 
-      // 4. Usar el método del modelo
+      // Usar el método del modelo
       const userRole = await ProjectUserModel.getUserRoleInProject(
         userId,
         projectId
       );
       console.log("Rol del usuario (método modelo):", userRole);
 
-      // 5. Listar TODOS los usuarios del proyecto
+      // Listar TODOS los usuarios del proyecto
       const allProjectUsers = await ProjectUserModel.getProjectUsers(projectId);
       console.log("Todos los usuarios del proyecto:", allProjectUsers);
 

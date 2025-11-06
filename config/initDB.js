@@ -5,17 +5,16 @@ const initDatabase = async () => {
   let connection;
   
   try {
-    // Connect without selecting database
+    // Connect sin selecccionar database
     connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASS,
-      multipleStatements: true // Permitir múltiples statements
+      multipleStatements: true 
     });
 
     console.log('Conectado al servidor MySQL');
 
-    // Create database if not exists
     await connection.execute(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME}\``);
     console.log(`Base de datos '${process.env.DB_NAME}' creada/verificada`);
 
@@ -33,7 +32,6 @@ const initDatabase = async () => {
 
     console.log(`Conectado a la base de datos '${process.env.DB_NAME}'`);
 
-    // Create tables
     console.log('Creando tablas...');
 
     // Tabla usuarios
@@ -47,7 +45,7 @@ const initDatabase = async () => {
         fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    console.log('✅ Tabla "usuarios" creada/verificada');
+    console.log('Tabla "usuarios" creada/verificada');
 
     // Tabla proyectos
     await connection.execute(`
@@ -60,7 +58,7 @@ const initDatabase = async () => {
         FOREIGN KEY (id_creador) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
       )
     `);
-    console.log('✅ Tabla "proyectos" creada/verificada');
+    console.log('Tabla "proyectos" creada/verificada');
 
     // Tabla usuarios_proyectos
     await connection.execute(`
@@ -75,7 +73,7 @@ const initDatabase = async () => {
         FOREIGN KEY (id_proyecto) REFERENCES proyectos(id_proyecto) ON DELETE CASCADE
       )
     `);
-    console.log('✅ Tabla "usuarios_proyectos" creada/verificada');
+    console.log('Tabla "usuarios_proyectos" creada/verificada');
 
     // Tabla tareas
     await connection.execute(`
@@ -85,7 +83,6 @@ const initDatabase = async () => {
         titulo VARCHAR(255) NOT NULL,
         descripcion TEXT,
         estado ENUM('pendiente', 'en progreso', 'completada') DEFAULT 'pendiente',
-        archivo VARCHAR(500),
         id_asignado INT,
         fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         fecha_vencimiento DATE,
@@ -93,11 +90,10 @@ const initDatabase = async () => {
         FOREIGN KEY (id_asignado) REFERENCES usuarios(id_usuario) ON DELETE SET NULL
       )
     `);
-    console.log('✅ Tabla "tareas" creada/verificada');
+    console.log('Tabla "tareas" creada/verificada');
 
-    console.log('🎉 Todas las tablas creadas exitosamente');
+    console.log('Todas las tablas creadas exitosamente');
 
-    // Insert admin user if not exists
     const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash('admin123', 10);
     
@@ -108,16 +104,15 @@ const initDatabase = async () => {
       );
 
       if (result.affectedRows > 0) {
-        console.log('✅ Usuario administrador creado: admin@example.com / admin123');
+        console.log('Usuario administrador creado: admin@example.com / admin123');
       } else {
-        console.log('ℹ️  Usuario administrador ya existe');
+        console.log('ℹUsuario administrador ya existe');
       }
 
     } catch (error) {
-      console.log('ℹ️  Usuario administrador ya existe o error al crearlo:', error.message);
+      console.log('ℹUsuario administrador ya existe o error al crearlo:', error.message);
     }
 
-    // Insert test user if not exists
     const testHashedPassword = await bcrypt.hash('usuario123', 10);
     try {
       const [result] = await connection.execute(
@@ -126,27 +121,27 @@ const initDatabase = async () => {
       );
 
       if (result.affectedRows > 0) {
-        console.log('✅ Usuario de prueba creado: usuario@example.com / usuario123');
+        console.log('Usuario de prueba creado: usuario@example.com / usuario123');
       } else {
-        console.log('ℹ️  Usuario de prueba ya existe');
+        console.log('ℹUsuario de prueba ya existe');
       }
 
     } catch (error) {
-      console.log('ℹ️  Usuario de prueba ya existe o error al crearlo:', error.message);
+      console.log('ℹUsuario de prueba ya existe o error al crearlo:', error.message);
     }
 
-    console.log('\n🎊 Base de datos inicializada exitosamente!');
-    console.log('\n📋 Credenciales de acceso:');
+    console.log('\nBase de datos inicializada exitosamente!');
+    console.log('\nCredenciales de acceso:');
     console.log('   Admin: admin@example.com / admin123');
     console.log('   Usuario: usuario@example.com / usuario123');
 
   } catch (error) {
-    console.error('❌ Error inicializando la base de datos:', error.message);
+    console.error('Error inicializando la base de datos:', error.message);
     console.error('Detalles:', error);
   } finally {
     if (connection) {
       await connection.end();
-      console.log('\n🔌 Conexión a la base de datos cerrada');
+      console.log('\nConexión a la base de datos cerrada');
     }
     process.exit();
   }
@@ -154,12 +149,12 @@ const initDatabase = async () => {
 
 // Manejar errores no capturados
 process.on('unhandledRejection', (error) => {
-  console.error('❌ Error no manejado:', error);
+  console.error('Error no manejado:', error);
   process.exit(1);
 });
 
 process.on('uncaughtException', (error) => {
-  console.error('❌ Excepción no capturada:', error);
+  console.error('Excepción no capturada:', error);
   process.exit(1);
 });
 

@@ -23,12 +23,10 @@ app.use(
     credentials: true,
   })
 );
+
 // Middlewares generales
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
-
-// Servir archivos estáticos
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Configuración de Swagger
 const swaggerJsdoc = require("swagger-jsdoc");
@@ -53,7 +51,7 @@ const swaggerOptions = {
         description: "Servidor de desarrollo",
       },
       {
-        url: "https://tu-backend.railway.app", // ← AGREGAR SERVIDOR DE PRODUCCIÓN
+        url: "https://tu-backend.railway.app", 
         description: "Servidor de producción",
       },
     ],
@@ -170,13 +168,6 @@ const startServer = async () => {
   try {
     // Probar conexión a la base de datos
     await testConnection();
-
-    // Crear carpeta uploads si no existe
-    const fs = require("fs");
-    const uploadsDir = path.join(__dirname, "uploads");
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
 
     app.listen(PORT, () => {
       console.log(` Servidor ejecutándose en http://localhost:${PORT}`);
