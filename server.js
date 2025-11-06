@@ -19,15 +19,7 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet());
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:19006",
-      "http://192.168.100.30:3000",
-      "http://192.168.100.30:19006",
-      "exp://192.168.100.30:19000",
-      'http://localhost:8081',
-      "https://nlnrgs0-el_gordo_dev-8081.exp.direct",
-    ],
+    origin: "*", // ← PERMITE TODAS LAS CONEXIONES
     credentials: true,
   })
 );
@@ -59,6 +51,10 @@ const swaggerOptions = {
       {
         url: `http://localhost:${PORT}`,
         description: "Servidor de desarrollo",
+      },
+      {
+        url: "https://tu-backend.railway.app", // ← AGREGAR SERVIDOR DE PRODUCCIÓN
+        description: "Servidor de producción",
       },
     ],
     components: {
