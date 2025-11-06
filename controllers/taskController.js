@@ -234,6 +234,17 @@ class TaskController {
 
   static async getTaskById(req, res) {
     try {
+      console.log("getTaskById() ejecutado con ID:", req.params.id);
+
+      if (req.task) {
+        console.log("Tarea ya cargada por middleware");
+        return res.json({
+          success: true,
+          data: req.task,
+        });
+      }
+
+      // Si no, búscala
       const taskId = req.params.id;
       const task = await TaskModel.findById(taskId);
 
@@ -243,18 +254,6 @@ class TaskController {
           message: "Tarea no encontrada",
         });
       }
-
-      // Verificar que el usuario tiene acceso al proyecto de esta tarea
-      const project = await ProjectModel.findById(task.id_proyecto);
-      if (!project) {
-        return res.status(404).json({
-          success: false,
-          message: "Proyecto no encontrado",
-        });
-      }
-
-      // Aquí podrías agregar lógica adicional para verificar permisos
-      // si es necesario
 
       res.json({
         success: true,
@@ -268,7 +267,6 @@ class TaskController {
       });
     }
   }
-
   static async deleteTask(req, res) {
     try {
       const taskId = req.params.id;
