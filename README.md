@@ -2,21 +2,19 @@
 
 Backend completo para sistema de gestión de proyectos desarrollado con Node.js, Express y MySQL.
 
-## 🚀 Características
+## Características
 
-- ✅ Autenticación JWT
-- ✅ Roles y permisos (Admin, Creador, Líder, Colaborador)
-- ✅ Gestión de proyectos y tareas
-- ✅ Subida de archivos
-- ✅ API RESTful documentada
-- ✅ Seguridad con Helmet y CORS
+- Autenticación JWT
+- Roles y permisos (Admin, Creador, Líder, Colaborador)
+- Gestión de proyectos y tareas
+- API RESTful documentada
 
-## 📋 Prerrequisitos
+## Prerrequisitos
 
 - Node.js 14+
 - MySQL 5.7+
 
-## 🛠️ Instalación
+## Instalación
 
 1. **Clonar el proyecto**
    ```bash
@@ -24,11 +22,10 @@ Backend completo para sistema de gestión de proyectos desarrollado con Node.js,
    cd backend
 Instalar dependencias
 
-bash
 npm install
+
 Configurar variables de entorno
 
-bash
 cp .env.example .env
 Editar .env con tus configuraciones:
 
