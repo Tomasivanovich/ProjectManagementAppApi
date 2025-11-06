@@ -22,8 +22,8 @@ Backend completo para sistema de gestión de proyectos desarrollado con Node.js,
    cd backend
 Instalar dependencias
 
-npm install
-
+      npm install
+   
 Configurar variables de entorno
 
 cp .env.example .env
