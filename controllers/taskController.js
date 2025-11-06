@@ -135,10 +135,16 @@ class TaskController {
 
       const updatedTask = await TaskModel.findById(taskId);
 
+      // **AGREGAR EL ROL A LA RESPUESTA**
+      const taskWithRole = {
+        ...updatedTask,
+        rol_proyecto: req.user.projectRole,
+      };
+
       res.json({
         success: true,
         message: "Tarea actualizada exitosamente",
-        data: updatedTask,
+        data: taskWithRole,
       });
     } catch (error) {
       console.error("Error actualizando tarea:", error);
@@ -172,10 +178,16 @@ class TaskController {
 
       const updatedTask = await TaskModel.findById(taskId);
 
+      // **AGREGAR EL ROL A LA RESPUESTA**
+      const taskWithRole = {
+        ...updatedTask,
+        rol_proyecto: req.user.projectRole,
+      };
+
       res.json({
         success: true,
         message: `Tarea marcada como ${estado}`,
-        data: updatedTask,
+        data: taskWithRole,
       });
     } catch (error) {
       console.error("Error completando tarea:", error);
@@ -235,29 +247,38 @@ class TaskController {
   static async getTaskById(req, res) {
     try {
       console.log("getTaskById() ejecutado con ID:", req.params.id);
+      console.log("👤 Usuario actual:", req.user.id_usuario);
+      console.log("🎯 Rol en el proyecto:", req.user.projectRole);
+
+      let task;
 
       if (req.task) {
-        console.log("Tarea ya cargada por middleware");
-        return res.json({
-          success: true,
-          data: req.task,
-        });
+        console.log("✅ Tarea ya cargada por middleware");
+        task = req.task;
+      } else {
+        // Si no, búscala
+        const taskId = req.params.id;
+        task = await TaskModel.findById(taskId);
+
+        if (!task) {
+          return res.status(404).json({
+            success: false,
+            message: "Tarea no encontrada",
+          });
+        }
       }
 
-      // Si no, búscala
-      const taskId = req.params.id;
-      const task = await TaskModel.findById(taskId);
+      // **AGREGAR ESTA PARTE CRUCIAL: Incluir el rol del proyecto en la respuesta**
+      const taskWithRole = {
+        ...task,
+        rol_proyecto: req.user.projectRole, // ← Esto es lo que necesita el frontend
+      };
 
-      if (!task) {
-        return res.status(404).json({
-          success: false,
-          message: "Tarea no encontrada",
-        });
-      }
+      console.log("📦 Tarea enviada con rol:", taskWithRole.rol_proyecto);
 
       res.json({
         success: true,
-        data: task,
+        data: taskWithRole,
       });
     } catch (error) {
       console.error("Error obteniendo tarea:", error);
@@ -267,6 +288,7 @@ class TaskController {
       });
     }
   }
+
   static async deleteTask(req, res) {
     try {
       const taskId = req.params.id;
