@@ -1,3 +1,7 @@
+const { pool } = require('../config/db');
+// Si usas TaskModel, asegúrate de importarlo
+// const TaskModel = require('../models/taskModel');
+
 const requireProjectRole = (roles) => {
   return async (req, res, next) => {
     try {
@@ -22,9 +26,14 @@ const requireProjectRole = (roles) => {
       // Caso 3: Rutas de tareas individuales (necesitan buscar el projectId)
       else if (req.baseUrl.includes('/tasks') && req.params.id) {
         console.log('📝 Ruta de tarea individual, buscando projectId para taskId:', req.params.id);
-        const task = await TaskModel.findById(req.params.id);
         
-        if (!task) {
+        // Usar pool directamente si TaskModel no está disponible
+        const [tasks] = await pool.execute(
+          'SELECT id_proyecto FROM tareas WHERE id_tarea = ?',
+          [req.params.id]
+        );
+        
+        if (tasks.length === 0) {
           console.log('❌ Tarea no encontrada');
           return res.status(404).json({
             success: false,
@@ -32,9 +41,8 @@ const requireProjectRole = (roles) => {
           });
         }
         
-        projectId = task.id_proyecto;
+        projectId = tasks[0].id_proyecto;
         console.log('✅ ProjectId encontrado desde tarea:', projectId);
-        req.task = task; // Guardar para reutilizar en el controlador
       }
       // Caso 4: ProjectId en el body (para crear tareas, etc.)
       else if (req.body.id_proyecto) {
@@ -94,4 +102,22 @@ const requireProjectRole = (roles) => {
   };
 };
 
+// 🔥 AGREGAR ESTA FUNCIÓN QUE FALTABA
+const requireAdmin = (req, res, next) => {
+  console.log('🔍 Middleware requireAdmin ejecutándose');
+  console.log('👤 Usuario:', req.user.id_usuario, 'Rol global:', req.user.rol_global);
+  
+  if (req.user && req.user.rol_global === 'admin') {
+    console.log('✅ Usuario es administrador, acceso permitido');
+    next();
+  } else {
+    console.log('❌ Usuario no es administrador, acceso denegado');
+    return res.status(403).json({
+      success: false,
+      message: 'Se requieren permisos de administrador'
+    });
+  }
+};
+
+// ✅ AHORA SÍ EXPORTAR AMBOS
 module.exports = { requireAdmin, requireProjectRole };
