@@ -4,6 +4,7 @@ const { validationResult } = require("express-validator");
 const UserModel = require("../models/userModel");
 const jwtConfig = require("../config/jwt");
 const { OAuth2Client } = require("google-auth-library");
+const axios = require('axios'); 
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const client = new OAuth2Client(CLIENT_ID);
@@ -128,38 +129,30 @@ class AuthController {
 
   static async googleLogin(req, res) {
     try {
-      const { access_token, id_token } = req.body;
+      const { access_token } = req.body;
 
-      if (!access_token && !id_token) {
+      if (!access_token) {
         return res
           .status(400)
-          .json({
-            success: false,
-            message: "Access token o ID token es requerido",
-          });
+          .json({ success: false, message: "Access token es requerido" });
       }
 
-      let userInfo;
+      console.log(
+        "Google access_token recibido:",
+        access_token.substring(0, 20) + "..."
+      );
 
-      if (access_token) {
-        // Usar access_token para obtener información del usuario
-        const userInfoResponse = await axios.get(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          {
-            headers: { Authorization: `Bearer ${access_token}` },
-          }
-        );
-        userInfo = userInfoResponse.data;
-      } else if (id_token) {
-        // Verificar id_token con Google
-        const ticket = await client.verifyIdToken({
-          idToken: id_token,
-          audience: GOOGLE_CLIENT_ID,
-        });
-        userInfo = ticket.getPayload();
-      }
+      // Verificar el token con Google usando access_token
+      const userInfoResponse = await axios.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: { Authorization: `Bearer ${access_token}` },
+        }
+      );
 
-      const { email, name: nombre, picture } = userInfo;
+      console.log("Respuesta de Google:", userInfoResponse.data);
+
+      const { email, name: nombre, picture } = userInfoResponse.data;
 
       if (!email) {
         return res
@@ -198,6 +191,7 @@ class AuthController {
     } catch (error) {
       console.error("Error login Google:", error);
 
+      // Error más específico
       if (error.response?.status === 401) {
         return res
           .status(401)
@@ -205,6 +199,10 @@ class AuthController {
             success: false,
             message: "Token de Google inválido o expirado",
           });
+      }
+
+      if (error.response?.data) {
+        console.error("Error de Google API:", error.response.data);
       }
 
       res
